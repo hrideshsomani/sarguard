@@ -1,11 +1,11 @@
 {
-  "total_cumulative_count": 80020000,
-  "total_flagged_count": 22809457,
-  "stream_cycles": 1348,
-  "last_batch_time": "2026-11-17T18:06:11.715991",
+  "total_cumulative_count": 80030300,
+  "total_flagged_count": 22814360,
+  "stream_cycles": 1554,
+  "last_batch_time": "2026-11-17T22:14:23.718504",
   "batch_size": 50,
   "interval_seconds": 10.0,
   "remembered_sets_count": 100,
-  "memory_bank_exemplars": 98446,
+  "memory_bank_exemplars": 97396,
   "status": "ONLINE_STREAMING_ACTIVE"
 }
