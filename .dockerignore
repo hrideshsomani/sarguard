@@ -1,0 +1,26 @@
+# Git & IDE configurations
+.git
+.gitignore
+.idea
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Testing & Cache
+.pytest_cache
+.coverage
+htmlcov
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Scratch files & temporary logs
+logs/*.log
+temp/
+scratch/
+patch_*.py

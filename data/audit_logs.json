@@ -1,0 +1,120 @@
+[
+  {
+    "case_id": "SAR-CASE-CUST-0003-2026",
+    "audit_timestamp": "2026-11-17 17:44:48",
+    "investigator": "COMPLIANCE_OFFICER_104",
+    "customer_id": "CUST-0003",
+    "customer_name": "Mary Brown",
+    "account_number": "ACCT-39345092",
+    "total_transactions_reviewed": 4,
+    "total_flagged_amount": 50739.17,
+    "ml_risk_score": 88.80000000000001,
+    "model_ensemble_breakdown": {
+      "rule_weight": "40%",
+      "random_forest_weight": "40%",
+      "isolation_forest_weight": "20%"
+    },
+    "triggered_rules": [
+      {
+        "id": "AML-RULE-103",
+        "name": "High-Risk Secrecy Jurisdiction Corridor",
+        "severity": "HIGH",
+        "description": "Cross-border fund transfer interacting with FATF grey/black listed jurisdiction or offshore financial center.",
+        "weight": 30,
+        "evidence": "High-risk corridor detected with FATF jurisdiction 'PA' on transaction of $50,000.00."
+      },
+      {
+        "id": "AML-RULE-104",
+        "name": "Extreme Turnover Volume Spike (>10x KYC baseline)",
+        "severity": "HIGH",
+        "description": "Transaction amount exceeds 10x the customer stated expected monthly turnover baseline.",
+        "weight": 25,
+        "evidence": "Amount $50,000.00 is 9.3x higher than stated monthly turnover ($5,370.16)."
+      },
+      {
+        "id": "AML-RULE-106",
+        "name": "Round-Denomination Offshore Wire Transfer",
+        "severity": "MEDIUM",
+        "description": "Exact round-sum cross-border wire transfer ($50k, $100k, $250k) with offshore corporate counterparty.",
+        "weight": 20,
+        "evidence": "Exact round denomination ($50,000.00) wire transfer routed to/from offshore jurisdiction."
+      }
+    ],
+    "narrative_lineage": [
+      {
+        "section": "Part I: Executive Summary",
+        "linked_transactions": [
+          "TXN-000603",
+          "TXN-001321",
+          "TXN-000003",
+          "TXN-000303"
+        ],
+        "rules_cited": [
+          "AML-RULE-103",
+          "AML-RULE-104",
+          "AML-RULE-106"
+        ],
+        "summary": "Synthesized summary of 4 transactions totaling $50,739.17."
+      },
+      {
+        "section": "Part II: Customer Due Diligence (KYC)",
+        "linked_transactions": [
+          "TXN-000603",
+          "TXN-001321"
+        ],
+        "rules_cited": [
+          "AML-RULE-104"
+        ],
+        "summary": "KYC turnover comparison ($5,370.16 baseline)."
+      },
+      {
+        "section": "Part III: Chronological Summary",
+        "linked_transactions": [
+          "TXN-000603",
+          "TXN-001321",
+          "TXN-000003",
+          "TXN-000303"
+        ],
+        "rules_cited": [
+          "AML-RULE-103",
+          "AML-RULE-104",
+          "AML-RULE-106"
+        ],
+        "summary": "Timestamped breakdown of all 4 flagged line-items."
+      },
+      {
+        "section": "Part IV: AML Typologies & Red Flags",
+        "linked_transactions": [
+          "TXN-000603",
+          "TXN-001321",
+          "TXN-000003",
+          "TXN-000303"
+        ],
+        "rules_cited": [
+          "AML-RULE-103",
+          "AML-RULE-104",
+          "AML-RULE-106"
+        ],
+        "summary": "Typology validation for ROUND TRIPPING SHELL with ensemble risk score 88.8."
+      },
+      {
+        "section": "Part V: Disposition & Recommendations",
+        "linked_transactions": [
+          "TXN-000603",
+          "TXN-001321",
+          "TXN-000003",
+          "TXN-000303"
+        ],
+        "rules_cited": [
+          "AML-RULE-103",
+          "AML-RULE-104",
+          "AML-RULE-106"
+        ],
+        "summary": "Disposition protocols: SAR filing, debit freeze, and law enforcement escalation."
+      }
+    ],
+    "cryptographic_seal_sha256": "3dfdd526bfe76a05772871567ff4eee45c7323ee344190b19c30093adf5ad341",
+    "is_tamper_verified": true,
+    "filing_status": "PENDING_REGULATORY_SUBMISSION"
+  }
+]

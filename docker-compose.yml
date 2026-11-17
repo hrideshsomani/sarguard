@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  aml-compliance-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aml-sar-generator:latest
+    container_name: aml_sar_mlops_container
+    ports:
+      - "8501:8501"  # Streamlit Web Compliance Dashboard (http://localhost:8501)
+      - "8000:8000"  # FastAPI MLOps REST API & Swagger UI (http://localhost:8000/docs)
+    volumes:
+      # Host volume mounts preserve model weights, datasets, and audit logs across container reboots
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - STREAMLIT_PORT=8501
+      - API_PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
