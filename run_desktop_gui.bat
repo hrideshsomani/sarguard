@@ -4,6 +4,7 @@ echo ========================================================
 echo Starting Enterprise AML AI SAR Narrative Generator (Desktop GUI)...
 echo ========================================================
 cd /d "%~dp0"
+set PYTHONUNBUFFERED=1
 
 where python >nul 2>nul
 if %ERRORLEVEL% EQU 0 (

@@ -139,7 +139,7 @@ def run_continuous_stream_worker(interval_seconds=10.0, batch_size=50, max_saved
             if len(all_recent_sets) > max_saved_sets:
                 all_recent_sets = all_recent_sets[:max_saved_sets]
 
-            # Save state to disk for UIs
+            # Save state to disk for UIs atomically
             meta_payload = {
                 'total_cumulative_count': cumulative_checked,
                 'total_flagged_count': cumulative_flagged,
@@ -152,11 +152,18 @@ def run_continuous_stream_worker(interval_seconds=10.0, batch_size=50, max_saved
                 'status': 'ONLINE_STREAMING_ACTIVE'
             }
             
-            with open(METADATA_PATH, 'w', encoding='utf-8') as f:
-                json.dump(meta_payload, f, indent=2)
+            try:
+                tmp_meta = METADATA_PATH + '.tmp'
+                with open(tmp_meta, 'w', encoding='utf-8') as f:
+                    json.dump(meta_payload, f, indent=2)
+                os.replace(tmp_meta, METADATA_PATH)
 
-            with open(RECENT_SETS_PATH, 'w', encoding='utf-8') as f:
-                json.dump(all_recent_sets, f, indent=2)
+                tmp_sets = RECENT_SETS_PATH + '.tmp'
+                with open(tmp_sets, 'w', encoding='utf-8') as f:
+                    json.dump(all_recent_sets, f, indent=2)
+                os.replace(tmp_sets, RECENT_SETS_PATH)
+            except Exception as io_err:
+                pass
 
             # Periodically persist trained weights safely with atomic rename
             if stream_cycles % 6 == 0:

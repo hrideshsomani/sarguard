@@ -13,5 +13,5 @@ if PROJECT_ROOT not in sys.path:
 from src.ui.desktop_app import launch_desktop_gui
 
 if __name__ == '__main__':
-    print("[+] Launching Enterprise AML Compliance Desktop GUI...")
+    print("[+] Launching Enterprise AML Compliance Desktop GUI...", flush=True)
     launch_desktop_gui()
