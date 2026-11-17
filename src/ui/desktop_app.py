@@ -140,8 +140,8 @@ class SARDesktopApp:
         self._build_narrative_tab()
         self._build_audit_tab()
         self._build_livestream_tab()
-        # Ensure default selected tab is the Executive Dashboard
-        self.notebook.select(self.tab_dashboard)
+        # Ensure default selected tab is the Continuous Live Stream tab so 50 txns are immediately shown
+        self.notebook.select(self.tab_livestream)
     def dispatch_to_ui(self, func, *args, **kwargs):
         """Thread-safe dispatch from ANY background thread to the Tkinter main thread."""
         self.ui_queue.put((func, args, kwargs))
@@ -185,6 +185,8 @@ class SARDesktopApp:
         self._update_models_tab()
         self._populate_narrative_case_dropdown()
         self._refresh_stream_table()
+        # Keep Continuous Live Stream Simulation tab active and visible
+        self.notebook.select(self.tab_livestream)
         # Start continuous 50-transaction streaming loop (every 10 seconds)
         self.root.after(10000, self._auto_stream_tick)
 
@@ -1057,6 +1059,15 @@ class SARDesktopApp:
 def launch_desktop_gui():
     root = tk.Tk()
     app = SARDesktopApp(root)
+    # Ensure window is fully visible, raised to front, and focused on user desktop
+    try:
+        root.deiconify()
+        root.lift()
+        root.attributes('-topmost', True)
+        root.after(400, lambda: root.attributes('-topmost', False))
+        root.focus_force()
+    except Exception:
+        pass
     root.mainloop()
 if __name__ == '__main__':
     launch_desktop_gui()

@@ -122,6 +122,9 @@ def run_continuous_stream_worker(interval_seconds=10.0, batch_size=50, max_saved
             batch_id = f"SET-{stream_cycles:05d}"
             
             # Record summary of this 50-transaction set
+            # Record all 50 transactions of this set so GUI displays complete 50-transaction batch
+            cols_to_save = ['timestamp', 'transaction_id', 'customer_id', 'originator_name', 'beneficiary_name', 'amount', 'transaction_type', 'sar_risk_score', 'sar_decision', 'triggered_rules_summary']
+            avail_cols = [c for c in cols_to_save if c in txns_df.columns]
             set_record = {
                 'batch_id': batch_id,
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -129,7 +132,7 @@ def run_continuous_stream_worker(interval_seconds=10.0, batch_size=50, max_saved
                 'flagged_count': set_flagged,
                 'avg_risk_score': float(txns_df['sar_risk_score'].mean()),
                 'max_risk_score': float(txns_df['sar_risk_score'].max()),
-                'sample_txns': txns_df[['transaction_id', 'customer_id', 'originator_name', 'amount', 'transaction_type', 'sar_risk_score', 'sar_decision', 'triggered_rules_summary']].head(10).to_dict(orient='records')
+                'sample_txns': txns_df[avail_cols].to_dict(orient='records')
             }
             
             all_recent_sets.insert(0, set_record)
