@@ -62,23 +62,18 @@ class SARDesktopApp:
         self.selected_stream_user_var = tk.StringVar(value="ALL")
         self.auto_train_stream_var = tk.BooleanVar(value=True)
         self.auto_stream_active = tk.BooleanVar(value=True)  # Keeps continuous 50 tokens ON
-        self.batch_filter_var = tk.StringVar(value="All Remembered Sets")
+        self.batch_filter_var = tk.StringVar(value="Latest Continuous 50 Txns (Live)")
 
-        # Load live stream metadata if available
-        meta_path = os.path.join(self.pipeline.data_dir, 'live_stream_metadata.json')
-        if os.path.exists(meta_path):
-            try:
-                import json
-                with open(meta_path, 'r', encoding='utf-8') as f:
-                    meta = json.load(f)
-                    self.total_streamed_count = meta.get('total_cumulative_count', 80000000)
-                    self.stream_cycles = meta.get('stream_cycles', 1000)
-            except Exception:
-                pass
+        # Sync live stream data and metadata immediately from disk so initial 50 txns appear on frame 1
+        self._sync_live_stream_from_disk()
 
         self._setup_styles()
         self._build_header()
         self._build_notebook()
+        # Immediately render initial continuous 50 transactions
+        self._refresh_stream_table()
+        # Start auto streaming surveillance loop
+        self.root.after(1500, self._auto_stream_tick)
         # Load initial pipeline in background thread so GUI opens instantly with zero freeze
         self.root.after(100, self._initial_load)
     def _setup_styles(self):
@@ -223,7 +218,7 @@ class SARDesktopApp:
                             })
                         if formatted:
                             self.all_stream_sets = formatted
-                            b_vals = ["All Remembered Sets"] + [f"{s['label']} [{s['timestamp']}]" for s in self.all_stream_sets]
+                            b_vals = ["Latest Continuous 50 Txns (Live)"] + [f"{s['label']} [{s['timestamp']}]" for s in self.all_stream_sets]
                             if hasattr(self, 'batch_combo'):
                                 self.batch_combo['values'] = b_vals
                                 if not self.batch_filter_var.get() or self.batch_filter_var.get() not in b_vals:
@@ -411,7 +406,7 @@ class SARDesktopApp:
         self.total_streamed_count += len(txns)
         self.stream_cycles += 1
 
-        b_vals = ["All Remembered Sets"] + [f"{s['label']} [{s['timestamp']}]" for s in self.all_stream_sets]
+        b_vals = ["Latest Continuous 50 Txns (Live)"] + [f"{s['label']} [{s['timestamp']}]" for s in self.all_stream_sets]
         if hasattr(self, 'batch_combo'):
             self.batch_combo['values'] = b_vals
             if not self.batch_filter_var.get() or self.batch_filter_var.get() not in b_vals:
@@ -428,11 +423,11 @@ class SARDesktopApp:
             for item in self.stream_tree.get_children():
                 self.stream_tree.delete(item)
 
-            if batch_sel and batch_sel != "All Remembered Sets":
-                matched_set = [s['txns'] for s in self.all_stream_sets if f"{s['label']} [{s['timestamp']}]" == batch_sel]
-                view_txns = matched_set[0] if (matched_set and not matched_set[0].empty) else self.stream_txns
+            if not batch_sel or batch_sel == "Latest Continuous 50 Txns (Live)":
+                view_txns = self.all_stream_sets[0]['txns'] if (self.all_stream_sets and not self.all_stream_sets[0]['txns'].empty) else self.stream_txns.head(50)
             else:
-                view_txns = self.stream_txns
+                matched_set = [s['txns'] for s in self.all_stream_sets if f"{s['label']} [{s['timestamp']}]" == batch_sel]
+                view_txns = matched_set[0] if (matched_set and not matched_set[0].empty) else self.stream_txns.head(50)
 
             if cid != "ALL" and not view_txns.empty and 'customer_id' in view_txns.columns:
                 view_txns = view_txns[view_txns['customer_id'] == cid]
@@ -1058,13 +1053,28 @@ class SARDesktopApp:
         messagebox.showinfo("Tamper Verification Test", msg)
 def launch_desktop_gui():
     root = tk.Tk()
+    root.title("Enterprise AML Compliance Suite - AI SAR Narrative Generator & Audit Trail")
+    # Center window on user display screen
+    try:
+        w = 1350
+        h = 850
+        sw = root.winfo_screenwidth()
+        sh = root.winfo_screenheight()
+        x = max(0, (sw - w) // 2)
+        y = max(0, (sh - h) // 2)
+        root.geometry(f"{w}x{h}+{x}+{y}")
+        root.minsize(1050, 700)
+    except Exception:
+        root.geometry("1350x850")
+
     app = SARDesktopApp(root)
     # Ensure window is fully visible, raised to front, and focused on user desktop
     try:
+        root.update_idletasks()
         root.deiconify()
         root.lift()
         root.attributes('-topmost', True)
-        root.after(400, lambda: root.attributes('-topmost', False))
+        root.after(800, lambda: root.attributes('-topmost', False))
         root.focus_force()
     except Exception:
         pass

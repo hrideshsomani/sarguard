@@ -158,10 +158,17 @@ def run_continuous_stream_worker(interval_seconds=10.0, batch_size=50, max_saved
             with open(RECENT_SETS_PATH, 'w', encoding='utf-8') as f:
                 json.dump(all_recent_sets, f, indent=2)
 
-            # Periodically persist trained weights (every 6 cycles = 1 minute)
+            # Periodically persist trained weights safely with atomic rename
             if stream_cycles % 6 == 0:
-                with open(os.path.join(pipe.models_dir, 'trained_aml_models.pkl'), 'wb') as f:
-                    pickle.dump(pipe.detector, f)
+                try:
+                    tmp_pkl = os.path.join(pipe.models_dir, 'trained_aml_models.pkl.tmp')
+                    dst_pkl = os.path.join(pipe.models_dir, 'trained_aml_models.pkl')
+                    with open(tmp_pkl, 'wb') as f:
+                        pickle.dump(pipe.detector, f)
+                    if os.path.exists(tmp_pkl):
+                        os.replace(tmp_pkl, dst_pkl)
+                except Exception as save_err:
+                    pass
 
             mem_k = len(pipe.detector.memory_bank)
             row = (
