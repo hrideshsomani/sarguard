@@ -1112,7 +1112,10 @@ class SARDesktopApp:
         self.ax_tradeoff.legend(fontsize=7, loc='upper center')
         self.ax_tradeoff.grid(True, linestyle=":", alpha=0.5)
 
-        self.fig.tight_layout(pad=2.0)
+        try:
+            self.fig.subplots_adjust(left=0.08, right=0.96, top=0.88, bottom=0.18, wspace=0.35)
+        except Exception:
+            pass
         self.canvas.draw_idle()
 
     # =========================================================================
@@ -1152,7 +1155,7 @@ class SARDesktopApp:
         """Asynchronously initializes SARPipeline in background without freezing the GUI."""
         def _bg_init():
             try:
-                from ..pipeline import SARPipeline
+                from src.pipeline import SARPipeline
                 pipe = SARPipeline()
                 metrics = pipe.initialize_data_and_models()
                 cases = pipe.get_flagged_cases()
@@ -1206,12 +1209,12 @@ def launch_desktop_gui():
     root = tk.Tk()
     root.title("Enterprise AML Compliance Suite | AI SAR Narrative Generator & 80M Surveillance")
 
-    # Adaptive display sizing: 1380x780 fits 1366x768, 1536x864, and 1920x1080 displays
+    # Adaptive display sizing: fits 1366x768, 1536x864, and 1920x1080 displays
     try:
         sw = root.winfo_screenwidth()
         sh = root.winfo_screenheight()
-        w = min(1380, sw - 40)
-        h = min(780, sh - 80)
+        w = min(1360, sw - 40)
+        h = min(760, sh - 80)
         x = max(0, (sw - w) // 2)
         y = max(0, (sh - h) // 4)
         root.geometry(f"{w}x{h}+{x}+{y}")
@@ -1219,21 +1222,16 @@ def launch_desktop_gui():
     except Exception:
         root.geometry("1280x750")
 
-    # Maximize on Windows for optimal full-screen view
-    try:
-        root.state('zoomed')
-    except Exception:
-        pass
-
+    # Instantiate Application
     app = SARDesktopApp(root)
 
-    # Bring window to front
+    # Bring window to front smoothly
     try:
         root.update_idletasks()
         root.deiconify()
         root.lift()
         root.attributes('-topmost', True)
-        root.after(600, lambda: root.attributes('-topmost', False))
+        root.after(400, lambda: root.attributes('-topmost', False))
         root.focus_force()
     except Exception:
         pass
